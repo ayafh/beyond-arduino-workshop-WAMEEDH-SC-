@@ -1,0 +1,66 @@
+1- preprocessor: 
+gcc -E beyodn.c -o beyond.i
+
+2- compilation 
+
+gcc -c beyond.c -o beyond.o
+
+3- assembling 
+
+gcc -c beyond.c -o beyond.o
+
+ELF files and binary utilities
+To understand the final stage of compilation, which is linking, and to visualise how ELF files are structured, we need to understand object files, particularly ELF files. We were able to generate object files in the previous stage, but we were not able to open them. To open this file, we need to understand the structure of an object file.
+ELF object files contain five kinds of information:
+
+    ELF header
+    Section header and different sections
+    Program header and different program sections
+    Object code
+    Debugging information
+
+ELF header
+All ELF object files start with the ELF header. It is in binary but has the following data structure format:
+# define EI_NIDENT 16
+ 
+typedef struct {
+unsigned char
+e_ident[EI_NIDENT];
+Elf64_Half e_type;
+Elf64_Half e_machine;
+Elf64_Word e_version;
+Elf64_Addr e_entry;
+Elf64_Off e_phoff;
+Elf64_Off e_shoff;
+Elf64_Word e_flags;
+Elf64_Half e_ehsize;
+Elf64_Half e_phentsize;
+Elf64_Half e_phnum;
+Elf64_Half e_shentsize;
+Elf64_Half e_shnum;
+Elf64_Half e_shstrndx;
+} Elf64_Ehdr;
+
+e_ident: This variable marks the file as an ELF object file and provides information about the object file.
+e_type: This member determines the object file type.
+e_machine: This member specifies the architecture for which this ELF is compiled.
+e_version: This member provides information about the version of the ELF object file.
+e_entry: This is the entry point or the start address of the program.
+e_phoff: This member provides offset from the ELF header at which the program header is present.
+e_shoff: This member provides offset from the ELF header at which the section header is present.
+e_flags: This member holds processor specific tags.
+e_ehsize: This member holds the ELF header size in bytes.
+e_phentsize: This member holds the size in bytes of one entry in the file’s program header table.
+e_phnum: This member holds the number of entries in the program header table.
+e_shentsize: This member holds a section header’s size in bytes.
+e_shnum: This member holds the number of entries in the section header table.
+To read the ELF header of our object file,‘study’, we will use a binary utility tool called readelf. The following is the command to read the ELF header of any object file:
+
+readelf -h beyond
+
+
+Linker
+This is the final stage of compilation. In this stage, the final executable ELF is generated. Linker takes all object files generated for each programming file in previous stages as inputs. It also takes a linker descriptor file as input. Linker combines sections from all object files into one final ELF. It instructs the linker descriptor file as to what addresses are to be provided for each section. It also resolves the symbols used by each object file. If any symbol is not defined, then linker gives an error. These are the stages by which a final executable is generated.
+
+In the case of ARM / AVR and other microcontroller platforms, Hex files are present. These are generated from ELF files using the following command:
+objcopy -O -ihex beyond beyond.hex
